@@ -5,19 +5,49 @@
  */
 package com.mycompany.evidenceplateb;
 
+import java.io.FileInputStream;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+
+
 /**
  *
  * @author vozka
  */
 public class mockup extends javax.swing.JFrame {
-
+    EmbeddedDataSource embeddedDataSource = new EmbeddedDataSource();
+    private static final Logger LOGGER = Logger.getLogger(mockup.class.getName());
+    PaymentManager paymentManager;
+    EntityManager entityManager;
     /**
      * Creates new form mockup
      */
     public mockup() {
+        try {
+            setUp();
+        } catch (Exception ex) {
+	    String msg = "Database setup failed.";
+            LOGGER.log(Level.SEVERE, msg, ex);
+        }
         initComponents();
+        
+        paymentManager = new PaymentManagerImpl(embeddedDataSource);
+        entityManager = new EntityManagerImpl(embeddedDataSource);
+        
+        
+        
     }
-
+    private void setUp() throws Exception {
+        Properties configFile = new Properties();
+        configFile.load(new FileInputStream("src/main/resources/com/mycompany/evidenceplateb/config.properties"));
+	EmbeddedDataSource dataSource = new EmbeddedDataSource();
+	dataSource.setDatabaseName( configFile.getProperty( "name" ) );
+	dataSource.setPassword( configFile.getProperty( "password" ) );
+	dataSource.setUser( configFile.getProperty( "username" ) );
+	embeddedDataSource = dataSource;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -57,9 +87,10 @@ public class mockup extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jList1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Payment Manager");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/mycompany/evidenceplateb/Bundle"); // NOI18N
+        setTitle(bundle.getString("PAYMENT MANAGER")); // NOI18N
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Payments"));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("payments_border"))); // NOI18N
 
         jList2.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -68,7 +99,7 @@ public class mockup extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jList2);
 
-        jTextField1.setText("Sum");
+        jTextField1.setText(bundle.getString("filter_sum_field")); // NOI18N
         jTextField1.setMinimumSize(new java.awt.Dimension(6, 25));
         jTextField1.setPreferredSize(new java.awt.Dimension(70, 25));
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
@@ -77,11 +108,11 @@ public class mockup extends javax.swing.JFrame {
             }
         });
 
-        jTextField2.setText("From entity");
+        jTextField2.setText(bundle.getString("filter_from_entity_field")); // NOI18N
         jTextField2.setMinimumSize(new java.awt.Dimension(6, 25));
         jTextField2.setPreferredSize(new java.awt.Dimension(70, 25));
 
-        jTextField3.setText("To entity");
+        jTextField3.setText(bundle.getString("filter_to_entity_field")); // NOI18N
         jTextField3.setMinimumSize(new java.awt.Dimension(6, 25));
         jTextField3.setPreferredSize(new java.awt.Dimension(70, 25));
         jTextField3.addActionListener(new java.awt.event.ActionListener() {
@@ -90,15 +121,20 @@ public class mockup extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("Find");
+        jButton1.setText(bundle.getString("payment_filter_button")); // NOI18N
         jButton1.setMaximumSize(new java.awt.Dimension(53, 25));
         jButton1.setPreferredSize(new java.awt.Dimension(53, 25));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Add new payment");
+        jButton2.setText(bundle.getString("add_payment_button")); // NOI18N
 
-        jButton3.setText("Remove");
+        jButton3.setText(bundle.getString("remove_payment_button")); // NOI18N
 
-        jButton4.setText("Edit");
+        jButton4.setText(bundle.getString("edit_payment_button")); // NOI18N
 
         jDateChooser1.setPreferredSize(new java.awt.Dimension(120, 25));
         jDateChooser1.setRequestFocusEnabled(false);
@@ -118,16 +154,16 @@ public class mockup extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
-                        .addGap(53, 53, 53)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                        .addGap(43, 43, 43)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 386, Short.MAX_VALUE)
                         .addComponent(jButton4)
                         .addGap(18, 18, 18)
                         .addComponent(jButton3)))
@@ -154,7 +190,7 @@ public class mockup extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Entities"));
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("entities_border"))); // NOI18N
 
         jList3.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -163,15 +199,15 @@ public class mockup extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(jList3);
 
-        jTextField6.setText("New Entity Name");
+        jTextField6.setText(bundle.getString("new_entity_field")); // NOI18N
 
-        jButton5.setText("Add");
+        jButton5.setText(bundle.getString("add_entity_button")); // NOI18N
         jButton5.setPreferredSize(new java.awt.Dimension(82, 23));
 
-        jButton6.setText("Edit");
+        jButton6.setText(bundle.getString("edit_entity_button")); // NOI18N
         jButton6.setPreferredSize(new java.awt.Dimension(82, 23));
 
-        jButton7.setText("Remove");
+        jButton7.setText(bundle.getString("remove_entity_button")); // NOI18N
         jButton7.setPreferredSize(new java.awt.Dimension(82, 23));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -238,6 +274,10 @@ public class mockup extends javax.swing.JFrame {
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments

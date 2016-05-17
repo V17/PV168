@@ -31,7 +31,13 @@ public class PaymentManagerImpl implements PaymentManager  {
             PaymentManagerImpl.class.getName());
 
               
-     
+    public PaymentManagerImpl(DataSource dataSource){
+        this.dataSource = dataSource;
+    }
+    public PaymentManagerImpl(){
+        
+    } 
+    
     @Override
     public void createPayment(Payment payment) {
         checkDataSource();
@@ -288,8 +294,8 @@ public class PaymentManagerImpl implements PaymentManager  {
         result.setId(rs.getLong("p_id"));
         result.setSum(rs.getBigDecimal("P_SUM"));
 
-        EntityManagerImpl manager = new EntityManagerImpl();
-        manager.setDataSource(dataSource);
+        EntityManagerImpl manager = new EntityManagerImpl(dataSource);
+        //manager.setDataSource(dataSource);
         result.setDate(toLocalDate(rs.getDate("P_Date")));
         result.setTo(manager.findEntityById(rs.getLong("P_TO")));
         result.setFrom(manager.findEntityById(rs.getLong("P_FROM")));

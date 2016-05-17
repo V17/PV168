@@ -48,7 +48,7 @@ public class PaymentManagerImplTest {
     public void setUp() throws SQLException {
         dataSource = prepareDataSource();
         paymentManager = new PaymentManagerImpl();
-        entityManager = new EntityManagerImpl();
+        entityManager = new EntityManagerImpl(dataSource);
         DBUtils.executeSqlScript(dataSource,PaymentManager.class.getResource("createTables.sql"));
         paymentManager.setDataSource(dataSource); 
         entityManager.setDataSource(dataSource);

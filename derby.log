@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Tue May 10 17:32:21 CEST 2016:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-0154-9b4c-2da9-00000e391ca0 
+Tue May 17 03:46:34 CEST 2016:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-0154-bc64-a9d0-00000e3932e0 
 on database directory memory:C:\Users\vojta\Downloads\ep-final\evidencePlateb\entitymgr-test with class loader sun.misc.Launcher$AppClassLoader@6bc7c054 
 Loaded from file:/C:/Users/vojta/.m2/repository/org/apache/derby/derby/10.12.1.1/derby-10.12.1.1.jar
 java.vendor=Oracle Corporation
@@ -12,8 +12,8 @@ os.version=10.0
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Tue May 10 17:32:23 CEST 2016:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance 780a81bc-0154-9b4c-2da9-00000e391ca0 
+Tue May 17 03:46:36 CEST 2016:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance 780a81bc-0154-bc64-a9d0-00000e3932e0 
 on database directory memory:C:\Users\vojta\Downloads\ep-final\evidencePlateb\paymentmgr-test with class loader sun.misc.Launcher$AppClassLoader@6bc7c054 
 Loaded from file:/C:/Users/vojta/.m2/repository/org/apache/derby/derby/10.12.1.1/derby-10.12.1.1.jar
 java.vendor=Oracle Corporation

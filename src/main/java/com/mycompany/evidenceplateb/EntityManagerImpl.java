@@ -28,6 +28,12 @@ public class EntityManagerImpl implements EntityManager {
     private static final Logger logger = Logger.getLogger(
             EntityManagerImpl.class.getName());
 
+    public EntityManagerImpl(DataSource dataSource){
+        this.dataSource = dataSource;
+    }
+    public EntityManagerImpl(){
+        
+    }
     
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
