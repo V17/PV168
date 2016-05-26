@@ -14,6 +14,7 @@ import com.mycompany.evidenceplateb.PaymentManagerImpl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableModel;
@@ -44,7 +45,8 @@ public class mockup extends javax.swing.JFrame {
     PaymentTableModel paymentTableModel;
 
     private SwingWorker swingWorker;
-
+    
+    
 
     private class setUpEntityTable extends SwingWorker<List<Entity>, Void> {
         @Override
@@ -70,7 +72,6 @@ public class mockup extends javax.swing.JFrame {
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.getLogger(mockup.class.getName()).log(Level.SEVERE, null, ex);
             }
-            updateComboBox();
         }
     }
     
@@ -79,7 +80,7 @@ public class mockup extends javax.swing.JFrame {
         protected List<Payment> doInBackground() throws Exception {
             List<Payment> payments = new ArrayList<>();
             try {
-                LOGGER.log(Level.INFO, "Retrieving entities");
+                LOGGER.log(Level.INFO, "Retrieving payments");
                 payments = paymentManager.findAllPayments();
             }catch(Exception e) {
                 String msg = "User request failed";
@@ -91,6 +92,7 @@ public class mockup extends javax.swing.JFrame {
         @Override
         protected void done() {
             try {
+                
                 List<Payment> payments = get();
                 for(Payment payment: payments) {
                     paymentTableModel.addPayment(payment);
@@ -148,7 +150,8 @@ public class mockup extends javax.swing.JFrame {
         @Override
         protected Entity doInBackground() throws Exception {
             try {
-                LOGGER.log(Level.INFO, "Deleting entity");
+   
+             LOGGER.log(Level.INFO, "Deleting entity");
                 entityManager.deleteEntity(entity);
             } catch (Exception ex) {
                 String msg = "Deleting failed";
@@ -171,7 +174,7 @@ public class mockup extends javax.swing.JFrame {
             }
         }
     }
-
+    
     private class UpdateEntitySwingWorker extends SwingWorker<Void, Void> {
 
         private final Entity entity;
@@ -200,8 +203,7 @@ public class mockup extends javax.swing.JFrame {
         public AddPaymentSwingWorker(Payment payment) {
             this.payment = payment;
         }
-
-        
+    
         @Override
         protected Payment doInBackground() throws Exception {
                        
@@ -227,6 +229,55 @@ public class mockup extends javax.swing.JFrame {
                 // K tomuto by v tomto případě nemělo nikdy dojít (viz níže)
                 throw new RuntimeException("Operation interrupted (this should never happen)", ex);
             }
+        }
+    }
+    
+    private class removePaymentSwingWorker extends SwingWorker<Void, Void> {
+
+        private final Payment payment;
+
+        public removePaymentSwingWorker(Payment payment) {
+            this.payment = payment;
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            try {
+   
+             LOGGER.log(Level.INFO, "Deleting entity");
+                paymentManager.deletePayment(payment);
+            } catch (Exception ex) {
+                String msg = "Deleting failed";
+                LOGGER.log(Level.INFO, msg);
+            }
+            return null;
+        }
+
+        @Override
+        protected void done() {
+                paymentTableModel.removePayment(payment);
+                updateComboBox();
+        }
+    }
+    
+    private class updatePaymentSwingWorker extends SwingWorker<Void, Void> {
+
+        private final Payment payment;
+
+        public updatePaymentSwingWorker(Payment payment) {
+            this.payment = payment;
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            try {
+                LOGGER.log(Level.INFO, "Updating payment");
+                paymentManager.updatePayment(payment);
+            } catch (Exception ex) {
+                String msg = "User request failed";
+                LOGGER.log(Level.INFO, msg);
+            }
+            return null;
         }
     }
 
@@ -261,6 +312,23 @@ public class mockup extends javax.swing.JFrame {
                 swingWorker = null;
             }
         });
+        
+        paymentTableModel.addTableModelListener((TableModelEvent e) ->{
+            if (e.getType() == TableModelEvent.UPDATE) {
+                String str = e.toString();
+                LOGGER.log(Level.INFO, str);
+                int row = e.getFirstRow();
+                Payment payment = new Payment();
+                payment.setId((Long) paymentTableModel.getValueAt(row, 0));
+                payment.setSum((BigDecimal) paymentTableModel.getValueAt(row, 1));
+                payment.setDate((LocalDate) paymentTableModel.getValueAt(row, 2));
+                payment.setFrom((Entity) paymentTableModel.getValueAt(row, 3));
+                payment.setFrom((Entity) paymentTableModel.getValueAt(row, 4));
+                swingWorker = new updatePaymentSwingWorker(payment);
+                swingWorker.execute();
+                swingWorker = null;
+            }
+        });
 
         swingWorker = new setUpEntityTable();
         swingWorker.execute();
@@ -269,8 +337,7 @@ public class mockup extends javax.swing.JFrame {
         swingWorker = new setUpPaymentTable();
         swingWorker.execute();
         swingWorker = null;
-        updateComboBox();
-
+        
     }
 
     private void setUp() {
@@ -299,14 +366,12 @@ public class mockup extends javax.swing.JFrame {
     private void updateComboBox() {
         fromComboBox.removeAllItems();
         ToComboBox.removeAllItems();
+        combo.removeAllItems();
         for (Entity e : entityTableModel.getAllEntities()) {
             fromComboBox.addItem(e.toString());
             ToComboBox.addItem(e.toString());
+            combo.addItem(e);
         }
-    }
-    
-    private void fillTables() {
-        
     }
 
     /**
@@ -324,7 +389,7 @@ public class mockup extends javax.swing.JFrame {
         SumTextFiield = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         AddPaymentButton = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        removePaymentButton = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jDateChooser = new com.toedter.calendar.JDateChooser();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -377,7 +442,12 @@ public class mockup extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText(bundle.getString("remove_payment_button")); // NOI18N
+        removePaymentButton.setText(bundle.getString("remove_payment_button")); // NOI18N
+        removePaymentButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removePaymentButtonActionPerformed(evt);
+            }
+        });
 
         jButton4.setText(bundle.getString("edit_payment_button")); // NOI18N
 
@@ -386,6 +456,8 @@ public class mockup extends javax.swing.JFrame {
 
         PaymentTable.setModel(new PaymentTableModel());
         jScrollPane3.setViewportView(PaymentTable);
+        PaymentTable.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(combo));
+        PaymentTable.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(combo));
 
         fromComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -425,7 +497,7 @@ public class mockup extends javax.swing.JFrame {
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(19, 19, 19))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton3)
+                                .addComponent(removePaymentButton)
                                 .addContainerGap())))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -447,7 +519,7 @@ public class mockup extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(AddPaymentButton)
                     .addComponent(jButton4)
-                    .addComponent(jButton3))
+                    .addComponent(removePaymentButton))
                 .addContainerGap())
         );
 
@@ -587,11 +659,30 @@ public class mockup extends javax.swing.JFrame {
         String name2 = (String) ToComboBox.getSelectedItem();
         Entity entity2 =  new Entity(entityTableModel.findEntityId(name2), name2);      
         payment.setTo(entity2);
+        combo.addItem(entity2);
         
         swingWorker = new AddPaymentSwingWorker(payment);
         swingWorker.execute();
         swingWorker = null;
     }//GEN-LAST:event_AddPaymentButtonActionPerformed
+
+    private void removePaymentButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removePaymentButtonActionPerformed
+        Payment payment = new Payment();
+        try {
+            payment.setId((Long) paymentTableModel.getValueAt(PaymentTable.getSelectedRow(), 0));
+            payment.setSum((BigDecimal) paymentTableModel.getValueAt(PaymentTable.getSelectedRow(), 1));
+            payment.setDate((LocalDate) paymentTableModel.getValueAt(PaymentTable.getSelectedRow(), 2));
+            payment.setFrom((Entity) paymentTableModel.getValueAt(PaymentTable.getSelectedRow(), 3));
+            payment.setFrom((Entity) paymentTableModel.getValueAt(PaymentTable.getSelectedRow(), 4));
+            
+        } catch (ArrayIndexOutOfBoundsException e) {
+            String msg = "No row selected";
+            LOGGER.log(Level.INFO, msg);
+        }
+        swingWorker = new removePaymentSwingWorker(payment);
+        swingWorker.execute();
+        swingWorker = null;
+    }//GEN-LAST:event_removePaymentButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -635,12 +726,12 @@ public class mockup extends javax.swing.JFrame {
     private javax.swing.JTextField EntityNameInput;
     private javax.swing.JTable EntityTable;
     private javax.swing.JTable PaymentTable;
+    private JComboBox<Entity> combo = new JComboBox<>();
     private javax.swing.JButton RemoveEntityButton;
     private javax.swing.JTextField SumTextFiield;
     private javax.swing.JComboBox<String> ToComboBox;
     private javax.swing.JComboBox<String> fromComboBox;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton6;
     private com.toedter.calendar.JDateChooser jDateChooser;
@@ -650,5 +741,6 @@ public class mockup extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JButton removePaymentButton;
     // End of variables declaration//GEN-END:variables
 }
